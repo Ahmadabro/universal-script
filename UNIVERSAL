@@ -1,0 +1,411 @@
+local play = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+
+
+
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Window = Rayfield:CreateWindow({
+   Name = "Rayfield Window",
+   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "Rayfield Interface Suite",
+   LoadingSubtitle = "by Sirius",
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Big Hub"
+   },
+
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "humanoid and jump power changer",
+      Subtitle = "Key System",
+      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+local Tab = Window:CreateTab("Main", 4483362458) -- Title, Image
+
+local Slider = Tab:CreateSlider({
+   Name = "humanoid speed",
+   Range = {0, 100},
+   Increment = 10,
+   Suffix = "WalkSpeed",
+   CurrentValue = 10,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+   -- The function that takes place when the slider changes
+   -- The variable (Value) is a number which correlates to the value the slider is currently at
+   local player = game:GetService("Players").LocalPlayer.Character.Humanoid
+   player.WalkSpeed = Value
+   end,
+})
+local Slider = Tab:CreateSlider({
+   Name = "JumpPower",
+   Range = {0, 100},
+   Increment = 10,
+   Suffix = "JumpPower",
+   CurrentValue = 10,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+   local player = game:GetService("Players").LocalPlayer.Character.Humanoid
+   player.JumpPower = Value
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "infinity yield",
+   Callback = function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Rivals aimbot",
+   Callback = function()
+   loadstring(game:HttpGet('https://raw.githubusercontent.com/ThunderScriptSolutions/Misc/refs/heads/main/RivalsSilentAim'))();
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Esp",
+   Callback = function()
+   local settings = {
+    enabled = true,
+    teamCheck = false,
+}
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local wtf = {}
+
+function esp(player)
+    if not settings.enabled then return end
+    if settings.teamCheck and player.Team == Players.LocalPlayer.Team then return end
+    if player == Players.LocalPlayer then return end
+
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    local Box = Drawing.new("Square")
+    Box.Color = Color3.new(1, 0, 0)
+    Box.Thickness = 2
+    Box.Transparency = 1
+    Box.Filled = false
+
+    local tracer = Drawing.new("Line")
+    tracer.Color = Color3.new(1, 0, 0)
+    tracer.Thickness = 1
+    tracer.Transparency = 1
+
+    local name = Drawing.new("Text")
+    name.Text = player.Name
+    name.Color = Color3.new(1, 1, 1)
+    name.Size = 20
+    name.Center = true
+    name.Outline = true
+    name.Transparency = 1
+
+    wtf[player] = {box = Box, tracer = tracer, name = name}
+
+    local function loop()
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            Box.Visible = false
+            tracer.Visible = false
+            name.Visible = false
+            return
+        end
+
+        local hrpPosition, onScreen = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position)
+        if onScreen then
+            local top = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position + Vector3.new(0, 3, 0))
+            local bottom = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position - Vector3.new(0, 3, 0))
+            local size = Vector2.new(math.abs(top.X - bottom.X) * 1.5, math.abs(top.Y - bottom.Y) * 1.5)
+            Box.Size = size
+            Box.Position = Vector2.new(hrpPosition.X - size.X / 2, hrpPosition.Y - size.Y / 2)
+            Box.Visible = true
+
+            tracer.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y)
+            tracer.To = Vector2.new(hrpPosition.X, hrpPosition.Y)
+            tracer.Visible = true
+
+            name.Position = Vector2.new(hrpPosition.X, hrpPosition.Y - size.Y / 2 - 20)
+            name.Visible = true
+        else
+            Box.Visible = false
+            tracer.Visible = false
+            name.Visible = false
+        end
+    end
+
+    RunService.RenderStepped:Connect(loop)
+end
+
+function remove(player)
+    if wtf[player] then
+        wtf[player].box:Remove()
+        wtf[player].tracer:Remove()
+        wtf[player].name:Remove()
+        wtf[player] = nil
+    end
+end
+
+function add(player)
+    player.CharacterAdded:Connect(function(character)
+        esp(player)
+    end)
+    player.CharacterRemoving:Connect(function(character)
+        remove(player)
+    end)
+    if player.Character then
+        esp(player)
+    end
+end
+
+Players.PlayerAdded:Connect(add)
+
+for _, player in pairs(Players:GetPlayers()) do
+    add(player)
+end
+
+function toggle(state)
+    settings.enabled = state
+    if not state then
+        for _, player in pairs(Players:GetPlayers()) do
+            remove(player)
+        end
+    else
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character then
+                esp(player)
+            end
+        end
+    end
+end
+
+function this_is_stupid(state)
+    settings.teamCheck = state
+end
+
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Mimic Hacks",
+   Callback = function()
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "i don't have one";
+		Text = "If you have you better send me one";
+		Icon = "";
+		Duration = "7";
+	})
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Color or die Hacks",
+   Callback = function()
+	local localPlayer = game.Players.LocalPlayer.Character.HumanoidRootPart
+ 
+local function getDistance(position1, position2)
+    return (position1 - position2).Magnitude
+end
+ 
+for i, player in pairs(workspace.GameplayAssets.Items:GetDescendants()) do
+    if player.Name == "Root" and player:IsA("Part") then
+        if not player:FindFirstChild("EspBox") then
+            local esp = Instance.new("BoxHandleAdornment", player)
+            local BillboardGui = Instance.new("BillboardGui")
+            local TextLabel = Instance.new("TextLabel")
+            esp.Adornee = player
+            esp.ZIndex = 0
+            esp.Size = Vector3.new(1, 1, 1)
+            esp.Transparency = 0.65
+            esp.Color3 = Color3.fromRGB(255, 48, 48)
+            esp.AlwaysOnTop = true
+            esp.Name = "EspBox"
+ 
+            BillboardGui.Parent = player
+            BillboardGui.AlwaysOnTop = true
+            BillboardGui.LightInfluence = 1
+            BillboardGui.Size = UDim2.new(0, 40, 0, 40)
+            BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+            BillboardGui.Name = "BillobardEsp"
+ 
+            TextLabel.Parent = BillboardGui
+            TextLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+            TextLabel.BackgroundTransparency = 1
+            TextLabel.Size = UDim2.new(1, 0, 1, 0)
+            TextLabel.Text = player.Parent.Name
+            TextLabel.TextStrokeTransparency = 0
+            TextLabel.TextWrapped = false
+            TextLabel.TextColor3 = Color3.new(1, 0, 0)
+ 
+ 
+            spawn(function()
+                while player.Parent do 
+                    local distance = getDistance(localPlayer.Position, player.Position)
+                    TextLabel.Text = player.Parent.Name .. " (" .. math.floor(distance) .. ")"
+                    wait() 
+                end
+            end)
+        end
+    end
+end
+ 
+for i, player in pairs(workspace.GameplayParts.Doors.Normal.Paintable:GetDescendants()) do
+    if player.Name == "Core" and player:IsA("Part") then
+        if not player:FindFirstChild("EspBox") then
+            local esp = Instance.new("BoxHandleAdornment", player)
+            local BillboardGui = Instance.new("BillboardGui")
+            local TextLabel = Instance.new("TextLabel")
+            esp.Adornee = player
+            esp.ZIndex = 0
+            esp.Size = Vector3.new(1, 12, 12)
+            esp.Transparency = 0.65
+            esp.Color3 = player:FindFirstChild("SurfaceGui"):FindFirstChild("Color").TextColor3
+            esp.AlwaysOnTop = true
+            esp.Name = "EspBox"
+ 
+            BillboardGui.Parent = player
+            BillboardGui.AlwaysOnTop = true
+            BillboardGui.LightInfluence = 1
+            BillboardGui.Size = UDim2.new(0, 40, 0, 40)
+            BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+            BillboardGui.Name = "BillobardEsp"
+ 
+            TextLabel.Parent = BillboardGui
+            TextLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+            TextLabel.BackgroundTransparency = 1
+            TextLabel.Size = UDim2.new(1, 0, 1, 0)
+            TextLabel.Text = player.Parent.Name
+            TextLabel.TextStrokeTransparency = 0
+            TextLabel.TextWrapped = false
+            TextLabel.TextColor3 = player:FindFirstChild("SurfaceGui"):FindFirstChild("Color").TextColor3
+ 
+ 
+            spawn(function()
+                while player.Parent do
+                    local distance = getDistance(localPlayer.Position, player.Position)
+                    TextLabel.Text = player.Parent.Name .. " (" .. math.floor(distance) .. ")"
+                    wait() 
+                end
+            end)
+        end
+    end
+end
+ 
+for i, player in pairs(workspace.GameplayAssets.Monsters:GetChildren()) do
+    if not player:FindFirstChild("EspBox") then
+        local esp = Instance.new("BoxHandleAdornment", player)
+        local BillboardGui = Instance.new("BillboardGui")
+        local TextLabel = Instance.new("TextLabel")
+        esp.Adornee = player
+        esp.ZIndex = 0
+        esp.Size = Vector3.new(5, 15, 2)
+        esp.Transparency = 0.65
+        esp.Color3 = Color3.fromRGB(0, 0, 0)
+        esp.AlwaysOnTop = true
+        esp.Name = "EspBox"
+ 
+        BillboardGui.Parent = player
+        BillboardGui.AlwaysOnTop = true
+        BillboardGui.LightInfluence = 1
+        BillboardGui.Size = UDim2.new(0, 40, 0, 40)
+        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+        BillboardGui.Name = "BillobardEsp"
+ 
+        TextLabel.Parent = BillboardGui
+        TextLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+        TextLabel.BackgroundTransparency = 1
+        TextLabel.Size = UDim2.new(1, 0, 1, 0)
+        TextLabel.Text = player.Name
+        TextLabel.TextStrokeTransparency = 0
+        TextLabel.TextWrapped = false
+        TextLabel.TextColor3 = Color3.new(1, 1, 1)
+ 
+        spawn(function()
+            while player.Parent do
+                local distance = getDistance(localPlayer.Position, player:FindFirstChild("HumanoidRootPart").Position)
+                TextLabel.Text = player.Name .. " (" .. math.floor(distance) .. ")"
+                wait() 
+            end
+        end)
+    end
+end
+for i, player in pairs(workspace.GameplayAssets.Items.Normal.PaintBucket:GetDescendants()) do
+    if player.Name == "Paint" then
+    if not player:FindFirstChild("EspBox") then
+        local esp = Instance.new("BoxHandleAdornment", player.Parent)
+        local BillboardGui = Instance.new("BillboardGui")
+        local TextLabel = Instance.new("TextLabel")
+        esp.Adornee = player.Parent
+        esp.ZIndex = 0
+        esp.Size = Vector3.new(1.5, 1.8, 1.5)
+        esp.Transparency = 0.65
+        esp.Color3 = player.Color
+        esp.AlwaysOnTop = true
+        esp.Name = "EspBox"
+ 
+        BillboardGui.Parent = player.Parent
+        BillboardGui.AlwaysOnTop = true
+        BillboardGui.LightInfluence = 1
+        BillboardGui.Size = UDim2.new(0, 40, 0, 40)
+        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+        BillboardGui.Name = "BillobardEsp"
+ 
+        TextLabel.Parent = BillboardGui
+        TextLabel.BackgroundTransparency = 1
+        TextLabel.Size = UDim2.new(1, 0, 1, 0)
+        TextLabel.Text = player.Parent.Name
+        TextLabel.TextStrokeTransparency = 0
+        TextLabel.TextWrapped = false
+        TextLabel.TextColor3 = player.Color
+ 
+        spawn(function()
+            while player.Parent do
+                local distance = getDistance(localPlayer.Position, player.Position)
+                TextLabel.Text = player.Parent.Name .. " (" .. math.floor(distance) .. ")"
+                wait() 
+            end
+        end)
+    end
+end
+end
+ 
+function dellEsp()
+    for i, player in pairs(workspace:GetDescendants()) do
+        if player.Name == "BillobardEsp" and player:IsA("BillboardGui") then
+            player:Destroy()
+        end
+        if player.Name == "EspBox" then
+            player:Destroy()
+        end
+    end
+end
+	
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Evade Script press right CONTROLL to see and unsee the gui",
+   Callback = function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/thaibao/main/TbaoHubEvade"))()
+   end,
+})
+
+local player = game:GetService("Players").LocalPlayer.Character.Humanoid
+   player.JumpPower = Value
